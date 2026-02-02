@@ -1,14 +1,20 @@
 package fr.isen.java2.db.daos;
 
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.sql.Connection;
 import java.sql.Statement;
+import java.time.LocalDate;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import fr.isen.java2.db.entities.Genre;
+import fr.isen.java2.db.entities.Movie;
+
 public class MovieDaoTestCase {
+	
 	@BeforeEach
 	public void initDb() throws Exception {
 		Connection connection = DataSourceFactory.getDataSource().getConnection();
@@ -39,16 +45,46 @@ public class MovieDaoTestCase {
 	
 	 @Test
 	 public void shouldListMovies() {
-		 fail("Not yet implemented");
+		 // WHEN
+		 MovieDao movieDao = new MovieDao();
+		 List<Movie> movies = movieDao.listMovies();
+		 
+		 // THEN
+		 assertThat(movies).hasSize(3);
+		 assertThat(movies).extracting("title").containsExactlyInAnyOrder("Title 1", "My Title 2", "Third title");
+		 // On vérifie qu'un des films a bien son genre associé
+		 assertThat(movies.get(0).getGenre()).isNotNull();
+		 assertThat(movies.get(0).getGenre().getName()).isIn("Drama", "Comedy");
 	 }
 	
 	 @Test
 	 public void shouldListMoviesByGenre() {
-		 fail("Not yet implemented");
+		 // WHEN
+		 MovieDao movieDao = new MovieDao();
+		 List<Movie> comedyMovies = movieDao.listMoviesByGenre("Comedy");
+		 
+		 // THEN
+		 assertThat(comedyMovies).hasSize(2);
+		 assertThat(comedyMovies).extracting("title").containsExactlyInAnyOrder("My Title 2", "Third title");
 	 }
 	
 	 @Test
 	 public void shouldAddMovie() throws Exception {
-		 fail("Not yet implemented");
+		 // GIVEN
+		 MovieDao movieDao = new MovieDao();
+		 Genre drama = new Genre(1, "Drama");
+		 Movie movie = new Movie("Interstellar", LocalDate.of(2014, 11, 5), drama, 169, "Christopher Nolan", "A great space odyssey");
+		 
+		 // WHEN
+		 Movie resultMovie = movieDao.addMovie(movie);
+		 
+		 // THEN
+		 assertThat(resultMovie.getId()).isNotNull();
+		 assertThat(resultMovie.getId()).isEqualTo(4); // C'est le 4ème film inséré
+		 
+		 // On vérifie en base que le nombre total a augmenté
+		 List<Movie> allMovies = movieDao.listMovies();
+		 assertThat(allMovies).hasSize(4);
+		 assertThat(allMovies).extracting("title").contains("Interstellar");
 	 }
 }

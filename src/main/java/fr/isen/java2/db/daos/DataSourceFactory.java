@@ -1,29 +1,42 @@
 package fr.isen.java2.db.daos;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import javax.sql.DataSource;
-
-import org.sqlite.SQLiteDataSource;
+import java.io.PrintWriter;
+import java.util.logging.Logger;
 
 public class DataSourceFactory {
 
-	private static SQLiteDataSource dataSource;
+    private static final String URL = "jdbc:sqlite:sqlite.db";
 
-	private DataSourceFactory() {
-		// This is a static class that should not be instantiated.
-		// Here's a way to remember it when this class will have 2K lines and you come
-		// back to it in 2 years
-		throw new IllegalStateException("This is a static class that should not be instantiated");
-	}
+    private DataSourceFactory() {
+        throw new IllegalStateException("This is a static class");
+    }
 
-	/**
-	 * @return a connection to the SQLite Database
-	 * 
-	 */
-	public static DataSource getDataSource() {
-		if (dataSource == null) {
-			dataSource = new SQLiteDataSource();
-			dataSource.setUrl("jdbc:sqlite:sqlite.db");
-		}
-		return dataSource;
-	}
+    /**
+     * Pour le Bonus 1 : On crée une implémentation légère de DataSource 
+     * qui utilise DriverManager, sans aucune classe spécifique à SQLite.
+     */
+    public static DataSource getDataSource() {
+        return new DataSource() {
+            @Override
+            public Connection getConnection() throws SQLException {
+                return DataSourceFactory.getConnection();
+            }
+            @Override public Connection getConnection(String u, String p) throws SQLException { return null; }
+            @Override public PrintWriter getLogWriter() throws SQLException { return null; }
+            @Override public void setLogWriter(PrintWriter out) throws SQLException {}
+            @Override public void setLoginTimeout(int seconds) throws SQLException {}
+            @Override public int getLoginTimeout() throws SQLException { return 0; }
+            @Override public Logger getParentLogger() { return null; }
+            @Override public <T> T unwrap(Class<T> iface) throws SQLException { return null; }
+            @Override public boolean isWrapperFor(Class<?> iface) throws SQLException { return false; }
+        };
+    }
+
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(URL);
+    }
 }

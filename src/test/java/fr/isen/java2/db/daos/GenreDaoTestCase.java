@@ -34,9 +34,7 @@ public class GenreDaoTestCase {
 
 	@Test
 	public void shouldListGenres() {
-		// WHEN
 		List<Genre> genres = genreDao.listGenres();
-		// THEN
 		assertThat(genres).hasSize(3);
 		assertThat(genres).extracting("id", "name").containsOnly(tuple(1, "Drama"), tuple(2, "Comedy"),
 				tuple(3, "Thriller"));
@@ -44,26 +42,20 @@ public class GenreDaoTestCase {
 	
 	@Test
 	public void shouldGetGenreByName() {
-		// WHEN
 		Genre genre = genreDao.getGenre("Comedy");
-		// THEN
 		assertThat(genre.getId()).isEqualTo(2);
 		assertThat(genre.getName()).isEqualTo("Comedy");
 	}
 	
 	@Test
 	public void shouldNotGetUnknownGenre() {
-		// WHEN
 		Genre genre = genreDao.getGenre("Unknown");
-		// THEN
 		assertThat(genre).isNull();
 	}
 	
 	@Test
 	public void shouldAddGenre() throws Exception {
-		// WHEN 
 		genreDao.addGenre("Western");
-		// THEN
 		Connection connection = DataSourceFactory.getDataSource().getConnection();
 		Statement statement = connection.createStatement();
 		ResultSet resultSet = statement.executeQuery("SELECT * FROM genre WHERE name='Western'");
