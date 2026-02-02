@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional; // IMPORTANT : Ajout de l'import pour le Bonus 2
+
 import fr.isen.java2.db.entities.Genre;
 
 public class GenreDao {
@@ -23,17 +25,21 @@ public class GenreDao {
         return genres;
     }
 
-    public Genre getGenre(String name) {
+    // Modification pour le Bonus 2 : Retourne Optional<Genre> au lieu de Genre
+    public Optional<Genre> getGenre(String name) {
         try (Connection connection = DataSourceFactory.getConnection();
              PreparedStatement statement = connection.prepareStatement("SELECT * FROM genre WHERE name = ?")) {
             statement.setString(1, name);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    return new Genre(resultSet.getInt("idgenre"), resultSet.getString("name"));
+                    // Si trouvé, on emballe dans un Optional
+                    return Optional.of(new Genre(resultSet.getInt("idgenre"), resultSet.getString("name")));
                 }
             }
         } catch (SQLException e) { e.printStackTrace(); }
-        return null;
+        
+        // Si non trouvé ou erreur, on renvoie un Optional vide (jamais null !)
+        return Optional.empty();
     }
 
     public void addGenre(String name) {

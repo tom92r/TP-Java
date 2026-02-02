@@ -38,6 +38,7 @@
 		    <groupId>org.xerial</groupId>
 		    <artifactId>sqlite-jdbc</artifactId>
 		    <version>3.51.1.0</version>
+		    <scope>runtime</scope> 
 		</dependency>
 	</dependencies>
 

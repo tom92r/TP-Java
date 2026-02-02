@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Optional; // Import nécessaire pour le Bonus 2
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,8 @@ public class GenreDaoTestCase {
 
 	@BeforeEach
 	public void initDatabase() throws Exception {
-		Connection connection = DataSourceFactory.getDataSource().getConnection();
+		// Mise à jour Bonus 1 : on utilise getConnection()
+		Connection connection = DataSourceFactory.getConnection();
 		Statement stmt = connection.createStatement();
 		stmt.executeUpdate(
 				"CREATE TABLE IF NOT EXISTS genre (idgenre INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT , name VARCHAR(50) NOT NULL);");
@@ -42,21 +44,27 @@ public class GenreDaoTestCase {
 	
 	@Test
 	public void shouldGetGenreByName() {
-		Genre genre = genreDao.getGenre("Comedy");
-		assertThat(genre.getId()).isEqualTo(2);
-		assertThat(genre.getName()).isEqualTo("Comedy");
+		// Modification Bonus 2 : le type de retour est Optional
+		Optional<Genre> genre = genreDao.getGenre("Comedy");
+		
+		assertThat(genre).isPresent(); // Vérifie que l'Optional n'est pas vide
+		assertThat(genre.get().getId()).isEqualTo(2); // On utilise .get() pour accéder à l'entité
+		assertThat(genre.get().getName()).isEqualTo("Comedy");
 	}
 	
 	@Test
 	public void shouldNotGetUnknownGenre() {
-		Genre genre = genreDao.getGenre("Unknown");
-		assertThat(genre).isNull();
+		// Modification Bonus 2 : On s'attend à un Optional vide au lieu de null
+		Optional<Genre> genre = genreDao.getGenre("Unknown");
+		
+		assertThat(genre).isEmpty(); // C'est ici qu'on évite les NullPointerExceptions !
 	}
 	
 	@Test
 	public void shouldAddGenre() throws Exception {
 		genreDao.addGenre("Western");
-		Connection connection = DataSourceFactory.getDataSource().getConnection();
+		// Mise à jour Bonus 1
+		Connection connection = DataSourceFactory.getConnection();
 		Statement statement = connection.createStatement();
 		ResultSet resultSet = statement.executeQuery("SELECT * FROM genre WHERE name='Western'");
 		assertThat(resultSet.next()).isTrue();
